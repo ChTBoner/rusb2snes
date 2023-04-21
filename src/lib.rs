@@ -233,6 +233,9 @@ impl SyncClient {
         }
         Ok(data)
     }
+    pub fn remove_path(&mut self, path : &str) -> Result<(), Error> {
+        self.send_command(Command::Remove, vec![path.to_owned()])
+    }
     pub fn get_address(&mut self, address: u32, size: usize) -> Result<Vec<u8>, Error> {
         self.send_command_with_space(
             Command::GetAddress,
