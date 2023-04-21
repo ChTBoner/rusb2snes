@@ -97,10 +97,7 @@ impl SyncClient {
         if self.devel {
             println!("Send command : {:?}", command);
         }
-        let nspace: Option<String> = match space {
-            None => None,
-            Some(sp) => Some(sp.to_string()),
-        };
+        let nspace: Option<String> = space.map(|sp| sp.to_string());
         let query = USB2SnesQuery {
             Opcode: command.to_string(),
             Space: nspace,
@@ -131,7 +128,7 @@ impl SyncClient {
             println!("Reply:");
             println!("{}", textreply);
         }
-        return Ok(serde_json::from_str(&textreply).unwrap());
+        Ok(serde_json::from_str(&textreply).unwrap())
     }
     pub fn set_name(&mut self, name: String) -> Result<(), Error> {
         self.send_command(Command::Name, vec![name])?;
@@ -140,12 +137,12 @@ impl SyncClient {
     pub fn app_version(&mut self) -> Result<String, Error> {
         self.send_command(Command::AppVersion, vec![])?;
         let usbreply = self.get_reply()?;
-        return Ok(usbreply.Results[0].to_string());
+        Ok(usbreply.Results[0].to_string())
     }
     pub fn list_device(&mut self) -> Result<Vec<String>, Error> {
         self.send_command(Command::DeviceList, vec![])?;
         let usbreply = self.get_reply()?;
-        return Ok(usbreply.Results);
+        Ok(usbreply.Results)
     }
     pub fn attach(&mut self, device: &String) -> Result<(), Error> {
         self.send_command(Command::Attach, vec![device.to_string()])?;
@@ -171,8 +168,8 @@ impl SyncClient {
         self.send_command(Command::Menu, vec![])?;
         Ok(())
     }
-    pub fn boot(&mut self, toboot: &String) -> Result<(), Error> {
-        self.send_command(Command::Boot, vec![toboot.clone()])?;
+    pub fn boot(&mut self, toboot: &str) -> Result<(), Error> {
+        self.send_command(Command::Boot, vec![toboot.to_owned()])?;
         Ok(())
     }
 
@@ -194,7 +191,7 @@ impl SyncClient {
             toret.push(info);
             i += 2;
         }
-        return Ok(toret);
+        Ok(toret)
     }
     pub fn send_file(&mut self, path: &String, data: Vec<u8>) -> Result<(), Error> {
         self.send_command(
@@ -214,10 +211,10 @@ impl SyncClient {
         }
         Ok(())
     }
-    pub fn get_file(&mut self, path: &String) -> Result<Vec<u8>, Error> {
-        self.send_command(Command::GetFile, vec![path.clone()])?;
+    pub fn get_file(&mut self, path: &str) -> Result<Vec<u8>, Error> {
+        self.send_command(Command::GetFile, vec![path.to_owned()])?;
         let string_hex = self.get_reply()?.Results[0].to_string();
-        let size = usize::from_str_radix(&string_hex.to_string(), 16).unwrap();
+        let size = usize::from_str_radix(&string_hex, 16).unwrap();
         let mut data: Vec<u8> = vec![];
         data.reserve(size);
         loop {
