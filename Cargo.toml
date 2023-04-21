@@ -2,6 +2,8 @@
 name = "rusb2snes"
 version = "0.1.0"
 edition = "2021"
+homepage = "https://github.com/ChTBoner/rusb2snes"
+repository = "https://github.com/ChTBoner/rusb2snes"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
