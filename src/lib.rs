@@ -33,6 +33,7 @@ pub enum Space {
     CMD,
 }
 
+#[derive(Debug)]
 pub struct Infos {
     pub version: String,
     pub dev_type: String,
