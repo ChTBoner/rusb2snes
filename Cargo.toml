@@ -6,6 +6,7 @@ homepage = "https://github.com/ChTBoner/rusb2snes"
 repository = "https://github.com/ChTBoner/rusb2snes"
 license-file = "LICENSE"
 description = "A simple library to interact with QUsb2Snes or SNI"
+readme = "README.md"
 
 [dependencies]
 strum_macros = "0.24"
