@@ -6,7 +6,6 @@ use tungstenite::{connect, stream::MaybeTlsStream, Message, WebSocket};
 use tungstenite::error::Error;
 
 #[derive(Display, Debug)]
-#[allow(dead_code)]
 pub enum Command {
     AppVersion,
     Name,
