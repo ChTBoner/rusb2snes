@@ -260,15 +260,16 @@ impl SyncClient {
         }
         Ok(data)
     }
-    pub fn get_multi_address(
+
+    pub fn get_multi_address_as_u8(
         &mut self,
         addresses: Vec<u32>,
-        sizes: Vec<u8>,
+        sizes: Vec<usize>,
     ) -> Result<Vec<u8>, Error> {
         let mut v_arg: Vec<String> = vec![];
         v_arg.reserve(addresses.len() * 2);
         let mut cpt = 0;
-        let mut total_size: u8 = 0;
+        let mut total_size: usize = 0;
         while cpt < addresses.len() {
             v_arg.push(format!("{:x}", addresses[cpt]));
             v_arg.push(format!("{:x}", sizes[cpt]));
@@ -276,19 +277,44 @@ impl SyncClient {
             cpt += 1
         }
         self.send_command_with_space(Command::GetAddress, Some(Space::SNES), v_arg)?;
+        let data = self.parse_multi_addresses(total_size)?;
+        Ok(data)
+    }
+
+    pub fn get_multi_address_as_vec_u8(
+        &mut self,
+        pairs: &[(u32, usize)],
+    ) -> Result<Vec<Vec<u8>>, Error> {
+        let mut args = vec![];
+        let mut total_size = 0;
+        for &(address, size) in pairs.iter() {
+            args.push(format!("{:x}", address));
+            args.push(format!("{:x}", size));
+            total_size += size;
+        }
+        self.send_command_with_space(Command::GetAddress, Some(Space::SNES), args)?;
+        let data = self.parse_multi_addresses(total_size as usize)?;
+        let mut ret: Vec<Vec<u8>> = vec![];
+        let mut consumed = 0;
+        for &(_address, size) in pairs.iter() {
+            ret.push(data[consumed..consumed + size].into());
+            consumed += size;
+        }
+        Ok(ret)
+    }
+
+    fn parse_multi_addresses(&mut self, size: usize) -> Result<Vec<u8>, Error> {
         let mut data: Vec<u8> = vec![];
-        data.reserve(total_size as usize);
+        data.reserve(size);
         loop {
             let reply = self.client.read_message()?;
             match reply {
                 Message::Binary(msgdata) => {
                     data.extend(&msgdata);
                 }
-                _ => {
-                    println!("Error getting a reply");
-                }
+                _ => println!("Error getting a reply"),
             }
-            if data.len() == total_size as usize {
+            if data.len() == size as usize {
                 break;
             }
         }
