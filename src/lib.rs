@@ -293,7 +293,7 @@ impl SyncClient {
             total_size += size;
         }
         self.send_command_with_space(Command::GetAddress, Some(Space::SNES), args)?;
-        let data = self.parse_multi_addresses(total_size as usize)?;
+        let data = self.parse_multi_addresses(total_size)?;
         let mut ret: Vec<Vec<u8>> = vec![];
         let mut consumed = 0;
         for &(_address, size) in pairs.iter() {
@@ -314,7 +314,7 @@ impl SyncClient {
                 }
                 _ => println!("Error getting a reply"),
             }
-            if data.len() == size as usize {
+            if data.len() == size {
                 break;
             }
         }
