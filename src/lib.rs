@@ -3,7 +3,7 @@ use std::net::TcpStream;
 use serde::{Deserialize, Serialize};
 use strum_macros::Display;
 use tungstenite::{connect, stream::MaybeTlsStream, Message, WebSocket};
-use tungstenite::error::Error;
+use tungstenite::Error;
 
 #[derive(Display, Debug)]
 pub enum Command {
@@ -109,12 +109,12 @@ impl SyncClient {
             println!("{}", json);
         }
         let message = Message::text(json);
-        self.client.write_message(message)?;
+        self.client.send(message)?;
         Ok(())
     }
 
     fn get_reply(&mut self) -> Result<USB2SnesResult, Error> {
-        let reply = self.client.read_message()?;
+        let reply = self.client.read()?;
         let mut textreply: String = String::from("");
         match reply {
             Message::Text(value) => {
@@ -202,7 +202,7 @@ impl SyncClient {
         let mut stop = 1024;
         while stop <= data.len() {
             self.client
-                .write_message(Message::binary(&data[start..stop]))?;
+                .send(Message::binary(&data[start..stop]))?;
             start += 1024;
             stop += 1024;
             if stop > data.len() {
@@ -218,7 +218,7 @@ impl SyncClient {
         let mut data: Vec<u8> = vec![];
         data.reserve(size);
         loop {
-            let reply = self.client.read_message().unwrap();
+            let reply = self.client.read().unwrap();
             match reply {
                 Message::Binary(msgdata) => {
                     data.extend(&msgdata);
@@ -245,7 +245,7 @@ impl SyncClient {
         let mut data: Vec<u8> = vec![];
         data.reserve(size);
         loop {
-            let reply = self.client.read_message()?;
+            let reply = self.client.read()?;
             match reply {
                 Message::Binary(msgdata) => {
                     data.extend(&msgdata);
@@ -307,7 +307,7 @@ impl SyncClient {
         let mut data: Vec<u8> = vec![];
         data.reserve(size);
         loop {
-            let reply = self.client.read_message()?;
+            let reply = self.client.read()?;
             match reply {
                 Message::Binary(msgdata) => {
                     data.extend(&msgdata);
